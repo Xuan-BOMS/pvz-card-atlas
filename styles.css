@@ -292,10 +292,15 @@ h1 {
 
 .detail-panel {
   min-width: 0;
+  position: sticky;
+  top: 18px;
+  align-self: start;
+  max-height: calc(100vh - 36px);
   padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  overflow-y: auto;
   border: 3px solid #7e4c29;
   border-radius: 7px;
   background-color: #f0d6a4;
@@ -485,6 +490,8 @@ body[data-category="zombies"] .stat-section, body[data-category="zombies"] .abil
     width: 100%;
     height: 100%;
     height: 100dvh;
+    max-height: none;
+    align-self: auto;
     padding: calc(10px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom));
     overflow-y: auto;
     border: 0;
