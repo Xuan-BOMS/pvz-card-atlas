@@ -8,11 +8,10 @@ let category = "plants";
 let returnFocus = null;
 
 function imagePath(card, selectedVariant = 0) {
-  if (card.variants) {
-    return `./assets/cards/SEED_PACKET_${card.id}_MOUND_LEVEL_${selectedVariant}.PNG`;
-  }
-  const id = card.id < 10 ? String(card.id).padStart(2, "0") : String(card.id);
-  return `./assets/cards/SEED_PACKET_${id}.PNG`;
+  const file = card.variants
+    ? `SEED_PACKET_${card.id}_MOUND_LEVEL_${selectedVariant}.PNG`
+    : `SEED_PACKET_${String(card.id).padStart(2, "0")}.PNG`;
+  return window.PVZ_IMAGE_DATA?.[file] || `./assets/cards/${file}`;
 }
 
 function currentItems() {
