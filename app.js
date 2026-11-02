@@ -49,6 +49,14 @@ function getDps(card) {
   };
 }
 
+function getPlantCardMeta(card) {
+  const sun = getPlantSun(card);
+  const dps = getDps(card);
+  if (dps) return `${sun} 阳 · ${dps.value}（${dps.ratio} 豆）`;
+  if (card.singleDamage !== undefined && !card.role.includes("控制")) return `${sun} 阳 · ${card.singleDamage} 伤`;
+  return `${sun} 阳 · ${card.health} 血`;
+}
+
 function renderGrid() {
   grid.replaceChildren();
   for (const card of currentItems()) {
@@ -74,7 +82,7 @@ function renderGrid() {
     const plantSun = category === "plants" ? getPlantSun(card) : null;
     const zombieCost = category === "zombies" ? getZombieCost(card) : null;
     const meta = category === "plants"
-      ? plantSun === "复制目标" ? "复制目标属性" : `${plantSun} 阳 · ${card.health} 血`
+      ? plantSun === "复制目标" ? "复制目标属性" : getPlantCardMeta(card)
       : card.id === 91
         ? `升级 ${zombieCost === null ? "满级" : `${zombieCost} 脑`} · ${zombieHealth} 血`
         : `${zombieCost ?? "—"} 脑 · ${zombieHealth ?? "—"} 血`;
@@ -133,6 +141,7 @@ function renderDetail() {
 
   const zombieStats = !isPlant ? catalog.zombieStats[card.id] : null;
   const zombieSpeed = !isPlant ? catalog.zombieSpeeds[card.id] : null;
+  const zombieMound = !isPlant && card.id === 91 ? catalog.zombieMoundProfiles[variantIndex[card.id] || 0] : null;
   const zombieCost = !isPlant ? getZombieCost(card) : null;
   const health = zombieStats ? getZombieHealth(card, zombieStats) : null;
   const dps = isPlant ? getDps(card) : null;
@@ -166,12 +175,22 @@ function renderDetail() {
   } else {
     if (zombieStats?.health?.parts) addStat(stats, "生命构成", zombieStats.health.parts);
     if (zombieSpeed?.note) addStat(stats, "行动阶段", zombieSpeed.note);
-    if (card.id === 91) addStat(stats, "墓堆等级", String(variantIndex[card.id] || 0));
+    if (zombieMound) {
+      addStat(stats, "墓堆等级", String(variantIndex[card.id] || 0));
+      addStat(stats, "召唤单位", zombieMound.summon);
+      addStat(stats, "每轮召唤", zombieMound.count);
+      addStat(stats, "首次召唤", zombieMound.firstInterval);
+      addStat(stats, "后续间隔", zombieMound.interval);
+    }
   }
   document.getElementById("ability-title").textContent = isPlant ? "攻击与能力" : "僵尸特性";
   document.getElementById("detail-attack").hidden = !isPlant;
   document.getElementById("detail-attack").textContent = isPlant ? card.attack : "";
-  document.getElementById("detail-ability").textContent = isPlant ? card.ability : card.feature;
+  document.getElementById("detail-ability").textContent = isPlant
+    ? card.ability
+    : zombieMound
+      ? `当前等级召唤${zombieMound.summon}；升级会改变召唤单位与墓堆耐久。`
+      : card.feature;
   renderVariants(card);
 }
 

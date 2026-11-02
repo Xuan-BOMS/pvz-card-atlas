@@ -162,6 +162,13 @@ window.PVZ_CATALOG = {
       91: 50, 92: 150, 93: 25, 94: 150, 95: 125, 96: 100, 97: 75, 98: 100, 99: 300, 100: 100,
       101: 100, 102: 100, 103: 100, 104: 50, 105: 75
   },
+  zombieMoundProfiles: {
+    0: { summon: "普通僵尸", count: "1 只", firstInterval: "20–30 秒（随机）", interval: "47–50 秒（随机）" },
+    1: { summon: "路障僵尸", count: "1 只", firstInterval: "20–30 秒（随机）", interval: "47–50 秒（随机）" },
+    2: { summon: "铁桶僵尸", count: "1 只", firstInterval: "20–30 秒（随机）", interval: "47–50 秒（随机）" },
+    3: { summon: "橄榄球僵尸", count: "1 只", firstInterval: "20–30 秒（随机）", interval: "47–50 秒（随机）" },
+    4: { summon: "巨人僵尸", count: "1 只", firstInterval: "20–30 秒（随机）", interval: "47–50 秒（随机）" }
+  },
   zombieStats: {
     61: { health: { value: 350, parts: "墓碑 350" } },
     62: { health: { value: 270, parts: "僵尸本体 270" } },
