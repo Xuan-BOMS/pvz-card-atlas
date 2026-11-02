@@ -75,10 +75,10 @@ function renderGrid() {
     const plantSun = category === "plants" ? getPlantSun(card) : null;
     const zombieCost = category === "zombies" ? getZombieCost(card) : null;
     const meta = category === "plants"
-      ? plantSun === "复制目标" ? `复制目标 · 生命 ${card.health}` : `阳光 ${plantSun} · 生命 ${card.health}`
+      ? plantSun === "复制目标" ? "复制目标属性" : `${plantSun} 阳 · ${card.health} 血`
       : card.id === 91
-        ? `升级 ${zombieCost === null ? "满级" : `${zombieCost} 脑光`} · 生命 ${zombieHealth}`
-        : `${zombieCost ?? "—"} 脑光 · 生命 ${zombieHealth ?? "—"}`;
+        ? `升级 ${zombieCost === null ? "满级" : `${zombieCost} 脑`} · ${zombieHealth} 血`
+        : `${zombieCost ?? "—"} 脑 · ${zombieHealth ?? "—"} 血`;
     addText(button, "span", "card-meta", meta);
     button.addEventListener("click", () => selectCard(card));
     grid.append(button);
@@ -133,6 +133,7 @@ function renderDetail() {
   art.alt = `${card.name}卡图`;
 
   const zombieStats = !isPlant ? catalog.zombieStats[card.id] : null;
+  const zombieSpeed = !isPlant ? catalog.zombieSpeeds[card.id] : null;
   const zombieCost = !isPlant ? getZombieCost(card) : null;
   const health = zombieStats ? getZombieHealth(card, zombieStats) : null;
   const dps = isPlant ? getDps(card) : null;
@@ -149,9 +150,10 @@ function renderDetail() {
   reference.hidden = !dps;
 
   const plantSun = isPlant ? getPlantSun(card) : null;
-  document.getElementById("detail-sun-row").querySelector("span").textContent = "阳光消耗";
-  document.getElementById("detail-sun").textContent = isPlant ? String(plantSun) : "";
-  document.getElementById("detail-sun-row").hidden = !isPlant;
+  document.getElementById("detail-secondary-label").textContent = isPlant ? "阳光消耗" : "行动速度";
+  document.getElementById("detail-secondary-value").textContent = isPlant
+    ? String(plantSun)
+    : zombieSpeed ? [zombieSpeed.value, zombieSpeed.unit].filter(Boolean).join(" ") : "未收录";
   document.getElementById("detail-health").textContent = isPlant ? card.health : health ?? "未收录";
   document.getElementById("detail-role").textContent = isPlant ? card.role : card.type;
 
@@ -162,12 +164,14 @@ function renderDetail() {
     else if (card.damage) addStat(stats, "攻击效果", card.damage);
     addStat(stats, "攻击间隔", card.attackInterval);
     addStat(stats, "布置间隔", getPlantRecharge(card));
-  } else if (zombieStats?.health?.parts) {
-    addStat(stats, "生命构成", zombieStats.health.parts);
+  } else {
+    if (zombieStats?.health?.parts) addStat(stats, "生命构成", zombieStats.health.parts);
+    if (zombieSpeed?.note) addStat(stats, "行动阶段", zombieSpeed.note);
     if (card.id === 91) addStat(stats, "墓堆等级", String(variantIndex[card.id] || 0));
   }
   document.getElementById("ability-title").textContent = isPlant ? "攻击与能力" : "僵尸特性";
-  document.getElementById("detail-attack").textContent = isPlant ? card.attack : card.type;
+  document.getElementById("detail-attack").hidden = !isPlant;
+  document.getElementById("detail-attack").textContent = isPlant ? card.attack : "";
   document.getElementById("detail-ability").textContent = isPlant ? card.ability : card.feature;
   renderVariants(card);
 }
