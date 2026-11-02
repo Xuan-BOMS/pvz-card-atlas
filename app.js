@@ -6,31 +6,6 @@ const selectedIds = { plants: 0, zombies: 62 };
 const variantIndex = { 91: 0 };
 let category = "plants";
 let returnFocus = null;
-const peaDps = catalog.dpsProfiles[0].damage / catalog.dpsProfiles[0].interval;
-
-function formatNumber(value) {
-  return Number.isInteger(value) ? String(value) : value.toFixed(1).replace(/\.0$/, "");
-}
-
-function formatRatio(value) {
-  return value.toFixed(2).replace(/\.?0+$/, "");
-}
-
-function getDps(card) {
-  const profile = catalog.dpsProfiles[card.id];
-  if (!profile) return null;
-  const values = Array.isArray(profile.damage) ? profile.damage : [profile.damage, profile.damage];
-  const dpsValues = values.map((damage) => damage / profile.interval);
-  const ratios = dpsValues.map((value) => value / peaDps);
-  const range = (list, formatter = formatNumber) => list[0] === list[1]
-    ? formatter(list[0])
-    : `${formatter(list[0])}–${formatter(list[1])}`;
-  return {
-    value: range(dpsValues),
-    ratio: range(ratios, formatRatio),
-    basis: `${range(values)} ÷ ${formatNumber(profile.interval)} 秒 = ${range(dpsValues)} DPS${profile.basis ? `；${profile.basis}` : ""}`
-  };
-}
 
 function imagePath(card, selectedVariant = 0) {
   if (card.variants) {
@@ -56,6 +31,25 @@ function addText(parent, tag, className, content) {
   return element;
 }
 
+function formatNumber(value) {
+  return Number.isInteger(value) ? String(value) : value.toFixed(1).replace(/\.0$/, "");
+}
+
+function getDps(card) {
+  const profile = catalog.dpsProfiles[card.id];
+  if (!profile) return null;
+  const hits = Array.isArray(profile.damage) ? profile.damage : [profile.damage, profile.damage];
+  const dps = hits.map((damage) => damage / profile.interval);
+  const peaDps = catalog.dpsProfiles[0].damage / catalog.dpsProfiles[0].interval;
+  const formatRange = (values, formatter) => values[0] === values[1]
+    ? formatter(values[0])
+    : `${formatter(values[0])}–${formatter(values[1])}`;
+  return {
+    value: formatRange(dps, formatNumber),
+    ratio: formatRange(dps.map((value) => value / peaDps), formatNumber)
+  };
+}
+
 function renderGrid() {
   grid.replaceChildren();
   for (const card of currentItems()) {
@@ -76,14 +70,15 @@ function renderGrid() {
     button.append(image);
     addText(button, "span", "card-name", card.name);
 
+    const zombieStats = category === "zombies" ? catalog.zombieStats[card.id] : null;
+    const zombieHealth = zombieStats ? getZombieHealth(card, zombieStats) : null;
+    const plantSun = category === "plants" ? getPlantSun(card) : null;
+    const zombieCost = category === "zombies" ? getZombieCost(card) : null;
     const meta = category === "plants"
-      ? `阳光 ${card.sun === null ? "复制目标" : card.sun} · 生命 ${card.health}`
-      : `${card.type} · #${card.id}`;
-    if (category === "plants") {
-      const dps = getDps(card);
-      const dpsText = dps ? `DPS ${dps.value} · ${dps.ratio} 豆` : "DPS —";
-      addText(button, "span", `card-dps${dps ? "" : " is-unrated"}`, dpsText);
-    }
+      ? plantSun === "复制目标" ? `复制目标 · 生命 ${card.health}` : `阳光 ${plantSun} · 生命 ${card.health}`
+      : card.id === 91
+        ? `升级 ${zombieCost === null ? "满级" : `${zombieCost} 脑光`} · 生命 ${zombieHealth}`
+        : `${zombieCost ?? "—"} 脑光 · 生命 ${zombieHealth ?? "—"}`;
     addText(button, "span", "card-meta", meta);
     button.addEventListener("click", () => selectCard(card));
     grid.append(button);
@@ -137,50 +132,72 @@ function renderDetail() {
   art.src = imagePath(card, variantIndex[card.id] || 0);
   art.alt = `${card.name}卡图`;
 
+  const zombieStats = !isPlant ? catalog.zombieStats[card.id] : null;
+  const zombieCost = !isPlant ? getZombieCost(card) : null;
+  const health = zombieStats ? getZombieHealth(card, zombieStats) : null;
   const dps = isPlant ? getDps(card) : null;
-  document.getElementById("detail-dps").textContent = dps ? `${dps.value} / 秒` : "—";
-  document.getElementById("detail-dps-ref").textContent = dps ? `${dps.ratio} 豆` : "非持续输出";
-  document.getElementById("dps-basis").textContent = dps
-    ? dps.basis
-    : isPlant ? "无固定持续攻击周期" : "僵尸卡不适用植物 DPS";
+  document.getElementById("detail-primary-label").textContent = isPlant
+    ? dps ? "输出" : card.singleDamage ? "单次伤害" : "伤害"
+    : "脑光消耗";
+  document.getElementById("detail-primary-value").textContent = isPlant
+    ? dps ? dps.value : card.singleDamage ?? card.damage ?? "—"
+    : card.id === 91
+      ? zombieCost === null ? "已满级" : `${zombieCost} 脑光`
+      : zombieCost === null ? "未收录" : `${zombieCost} 脑光`;
+  const reference = document.getElementById("detail-primary-ref");
+  reference.textContent = dps ? `${dps.ratio} 豆` : "";
+  reference.hidden = !dps;
 
-  document.getElementById("detail-sun").textContent = isPlant
-    ? card.sun === null ? "复制目标" : String(card.sun)
-    : "—";
-  document.getElementById("detail-health").textContent = isPlant ? card.health : "—";
+  const plantSun = isPlant ? getPlantSun(card) : null;
+  document.getElementById("detail-sun-row").querySelector("span").textContent = "阳光消耗";
+  document.getElementById("detail-sun").textContent = isPlant ? String(plantSun) : "";
+  document.getElementById("detail-sun-row").hidden = !isPlant;
+  document.getElementById("detail-health").textContent = isPlant ? card.health : health ?? "未收录";
   document.getElementById("detail-role").textContent = isPlant ? card.role : card.type;
 
   const stats = document.getElementById("stat-list");
   stats.replaceChildren();
   if (isPlant) {
-    addStat(stats, "DPS", dps ? `${dps.value} / 秒（${dps.ratio} 豆）` : "—（非持续输出）");
-    addStat(stats, "阳光消耗", card.sun === null ? "按复制对象" : `${card.sun} 阳光`);
-    addStat(stats, "生命值", card.health);
-    addStat(stats, "基础伤害", card.damage);
+    if (dps) addStat(stats, "单发伤害", card.damage);
+    else if (card.damage) addStat(stats, "攻击效果", card.damage);
     addStat(stats, "攻击间隔", card.attackInterval);
-    addStat(stats, "布置间隔", card.recharge);
-    addStat(stats, "作战类型", card.role);
-  } else {
-    addStat(stats, "卡牌类别", card.type);
-    addStat(stats, "种子编号", String(card.id));
-    addStat(stats, "卡图版本", "3215");
-    addStat(stats, "单位", "僵尸侧");
+    addStat(stats, "布置间隔", getPlantRecharge(card));
+  } else if (zombieStats?.health?.parts) {
+    addStat(stats, "生命构成", zombieStats.health.parts);
+    if (card.id === 91) addStat(stats, "墓堆等级", String(variantIndex[card.id] || 0));
   }
-
   document.getElementById("ability-title").textContent = isPlant ? "攻击与能力" : "僵尸特性";
   document.getElementById("detail-attack").textContent = isPlant ? card.attack : card.type;
   document.getElementById("detail-ability").textContent = isPlant ? card.ability : card.feature;
-  document.getElementById("data-note").textContent = isPlant
-    ? `DPS按单目标每轮伤害 ÷ 攻击周期计算；1 豆 = 豌豆射手 ${formatNumber(peaDps)} DPS。${dps?.basis.includes("黄油概率") ? "玉米投手按源码黄油概率折算期望值。" : ""}模式平衡、强化效果与命中数可能改变实际表现。`
-    : "僵尸卡按 v3215 卡牌目录展示；此页不含胜率或对局统计。";
   renderVariants(card);
+}
+
+function getZombieCost(card) {
+  if (card.id === 91) {
+    const moundCosts = [100, 200, 300, 450, null];
+    return moundCosts[variantIndex[card.id] || 0];
+  }
+  return catalog.zombieCosts[card.id] ?? null;
+}
+
+function getPlantSun(card) {
+  return card.sun === null ? "复制目标" : catalog.plantCosts[card.id] ?? card.sun;
+}
+
+function getPlantRecharge(card) {
+  return catalog.plantRecharges[card.id] ?? card.recharge;
+}
+
+function getZombieHealth(card, stats) {
+  const health = stats.health;
+  if (card.id === 91) return health.levels[variantIndex[card.id] || 0];
+  return health.value;
 }
 
 function renderCategory() {
   const isPlant = category === "plants";
   document.body.dataset.category = category;
   document.getElementById("catalog-title").textContent = isPlant ? "图鉴 — 植物" : "图鉴 — 僵尸";
-  document.getElementById("scope-note").textContent = isPlant ? "收录植物基础属性与能力" : "按卡牌编号浏览僵尸特性";
   document.getElementById("card-count").textContent = `${currentItems().length} 张`;
   for (const button of document.querySelectorAll(".category-button")) {
     const active = button.dataset.category === category;
