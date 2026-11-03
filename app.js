@@ -38,7 +38,8 @@ function getDps(card) {
   const profile = catalog.dpsProfiles[card.id];
   if (!profile) return null;
   const hits = Array.isArray(profile.damage) ? profile.damage : [profile.damage, profile.damage];
-  const dps = hits.map((damage) => damage / profile.interval);
+  const hitsPerTarget = profile.hitsPerTarget ?? 1;
+  const dps = hits.map((damage) => damage * hitsPerTarget / profile.interval);
   const peaDps = catalog.dpsProfiles[0].damage / catalog.dpsProfiles[0].interval;
   const formatRange = (values, formatter) => values[0] === values[1]
     ? formatter(values[0])
