@@ -28,14 +28,14 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background-color: #c38a4b;
-  background-image:
-    repeating-linear-gradient(7deg, rgba(110, 61, 25, 0.045) 0 1px, transparent 1px 9px),
-    repeating-linear-gradient(96deg, rgba(255, 236, 188, 0.08) 0 2px, transparent 2px 13px),
-    linear-gradient(135deg, #e0b16a 0%, #c38b4d 43%, #b8793d 100%);
+  background-image: url("./site/ui/plant-background.webp");
+  background-position: center top;
+  background-size: cover;
+  background-attachment: fixed;
 }
 
 button { font: inherit; }
-button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 
 .page-shell {
   width: min(1440px, 100%);
@@ -592,4 +592,23 @@ body[data-category="zombies"] .stat-section, body[data-category="zombies"] .abil
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}
+
+body[data-category="zombies"] { background-image: url("./site/ui/zombie-background.webp"); }
+.site-header { grid-template-columns: 1fr; position: relative; }
+.header-emblem, .header-stamp { display: none; }
+.title-plank { justify-self: center; width: min(560px, 100%); min-height: 58px; display: grid; place-items: center; border: 0; background: transparent; box-shadow: none; }
+.title-plank::before, .title-plank::after { display: none; }
+.catalog-area { background-color: #f0d9a5df; }
+body[data-category="zombies"] .catalog-area { background-color: #ded6e6e6; }
+.catalog-nav { background: #f0d7a7e6; }
+body[data-category="zombies"] .catalog-nav { border-color: #655c77; background: #d9d0e1eb; }
+.card-grid { content-visibility: auto; contain-intrinsic-size: auto 900px; }
+@media (max-width: 700px) {
+  .site-header { grid-template-columns: 1fr; min-height: 63px; }
+  .title-plank { min-height: 48px; padding: 6px 14px; }
+}
+@media (max-width: 900px) and (orientation: landscape) {
+  .site-header { grid-template-columns: 1fr; min-height: 49px; }
+  .title-plank { min-height: 43px; }
 }

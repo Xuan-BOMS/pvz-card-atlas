@@ -193,6 +193,20 @@ window.PVZ_CATALOG = {
     3: { summon: "橄榄球僵尸", count: "1 只", firstInterval: "20–30 秒（随机）", interval: "47–50 秒（随机）" },
     4: { summon: "巨人僵尸", count: "1 只", firstInterval: "20–30 秒（随机）", interval: "47–50 秒（随机）" }
   },
+  productionProfiles: {
+    plants: {
+      1: { interval: "首次 3–12.5 秒；后续 23.5–25 秒（随机）", amount: "25 阳光" },
+      9: { interval: "首次 3–12.5 秒；后续 23.5–25 秒（随机）", amount: "幼体 15 阳光；成熟后 25 阳光" },
+      207: { interval: "僵尸受伤时触发（无固定周期）", amount: "每 20 点伤害转为 5 阳光；最多 200 阳光" }
+    },
+    zombies: {
+      61: { interval: "首次 3–15 秒；后续 28.5–30 秒（随机）", amount: "25 脑光" },
+      91: {
+        interval: "28.5–30 秒（随机）",
+        amounts: ["25 脑光", "40 脑光", "50 脑光", "65 脑光", "75 脑光"]
+      }
+    }
+  },
   zombieStats: {
     61: { health: { value: 350 } },
     62: { health: { value: 270 } },

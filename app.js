@@ -24,7 +24,7 @@ function imagePath(card, selectedVariant = 0) {
   const file = card.variants
     ? `SEED_PACKET_${card.id}_MOUND_LEVEL_${selectedVariant}.PNG`
     : `SEED_PACKET_${String(card.id).padStart(2, "0")}.PNG`;
-  return window.PVZ_IMAGE_DATA?.[file] || `./assets/cards/${file}`;
+  return window.PVZ_IMAGE_DATA?.[file] || `./assets/cards/${file.replace(/\.PNG$/, ".webp")}`;
 }
 
 function currentItems() {
@@ -97,11 +97,12 @@ function addCardFace(parent, card, costLabel, selectedVariant = 0, imageId = "")
   const face = addText(parent, "span", "card-face", "");
   const image = document.createElement("img");
   if (imageId) image.id = imageId;
-  image.src = imagePath(card, selectedVariant);
   image.alt = `${getCardName(card)}卡图`;
   image.loading = imageId ? "eager" : "lazy";
+  image.decoding = "async";
   image.width = 200;
   image.height = 280;
+  image.src = imagePath(card, selectedVariant);
   face.append(image);
   addText(face, "span", "card-cost", costLabel);
   return image;
@@ -122,6 +123,18 @@ function renderGrid() {
     addText(button, "span", "card-name", getCardName(card));
     button.addEventListener("click", () => selectCard(card));
     grid.append(button);
+  }
+}
+
+function updateGridSelection(card, updateFace = false) {
+  for (const button of grid.children) {
+    const active = button.dataset.cardId === String(card.id);
+    button.classList.toggle("is-selected", active);
+    button.setAttribute("aria-pressed", String(active));
+    if (active && updateFace) {
+      button.querySelector("img").src = imagePath(card, variantIndex[card.id] || 0);
+      button.querySelector(".card-cost").textContent = getCardCostLabel(card);
+    }
   }
 }
 
@@ -156,7 +169,7 @@ function renderVariants(card) {
     button.setAttribute("aria-label", `${label} ${button.textContent}`);
     button.addEventListener("click", () => {
       variantIndex[card.id] = index;
-      renderGrid();
+      updateGridSelection(card, true);
       renderDetail();
       list.querySelectorAll("button")[index].focus();
     });
@@ -189,6 +202,7 @@ function renderDetail() {
   const zombieCost = !isPlant ? getZombieCost(card) : null;
   const health = zombieStats ? getZombieHealth(card, zombieStats) : null;
   const dps = isPlant ? getDps(card) : null;
+  const production = catalog.productionProfiles[category][card.id];
   document.getElementById("detail-cost-label").textContent = isPlant ? "阳光花费" : "脑光花费";
   document.getElementById("detail-cost-value").textContent = isPlant
     ? String(getPlantSun(card))
@@ -242,6 +256,11 @@ function renderDetail() {
       addStat(stats, "首次召唤", zombieMound.firstInterval);
       addStat(stats, "后续间隔", zombieMound.interval);
     }
+  }
+  if (production) {
+    addStat(stats, isPlant ? "阳光生产间隔" : "脑光生产间隔", production.interval);
+    const amount = production.amount || production.amounts?.[variantIndex[card.id] || 0];
+    if (amount) addStat(stats, isPlant ? "单次阳光产量" : "单次脑光产量", amount);
   }
   document.getElementById("ability-title").textContent = "描述";
   document.getElementById("detail-attack").hidden = true;
@@ -311,7 +330,7 @@ function renderCategory() {
 
 function selectCard(card) {
   selectedIds[category] = card.id;
-  renderGrid();
+  updateGridSelection(card);
   renderDetail();
   if (window.matchMedia("(max-width: 700px)").matches) {
     returnFocus = grid.querySelector(`[data-card-id="${card.id}"]`);
@@ -364,4 +383,13 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+const homeUrl = location.protocol === "file:"
+  ? "http://154.219.106.185:48080/"
+  : location.pathname.startsWith("/almanac/") ? "/" : "./";
+for (const link of document.querySelectorAll("[data-home-link]")) link.href = homeUrl;
+document.querySelector("[data-download-link]").href = `${homeUrl}#downloads`;
+document.querySelector("[data-data-link]").href = location.protocol === "file:" || location.hostname.endsWith("github.io")
+  ? "http://154.219.106.185:48080/data/" : "/data/";
 renderCategory();
+const preloadBackground = new Image();
+preloadBackground.src = window.PVZ_IMAGE_DATA?.["zombie-background.webp"] || "./site/ui/zombie-background.webp";
