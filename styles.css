@@ -599,8 +599,8 @@ body[data-category="zombies"] { background-image: url("./site/ui/zombie-backgrou
 .header-emblem, .header-stamp { display: none; }
 .title-plank { justify-self: center; width: min(560px, 100%); min-height: 58px; display: grid; place-items: center; border: 0; background: transparent; box-shadow: none; }
 .title-plank::before, .title-plank::after { display: none; }
-.catalog-area { background-color: #f0d9a5df; }
-body[data-category="zombies"] .catalog-area { background-color: #ded6e6e6; }
+.catalog-area { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+body[data-category="zombies"] .catalog-area { background: transparent; }
 .catalog-nav { background: #f0d7a7e6; }
 body[data-category="zombies"] .catalog-nav { border-color: #655c77; background: #d9d0e1eb; }
 .card-grid { content-visibility: auto; contain-intrinsic-size: auto 900px; }
