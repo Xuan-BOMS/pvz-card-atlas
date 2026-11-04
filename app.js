@@ -89,7 +89,7 @@ function renderGrid() {
   for (const card of currentItems()) {
     const button = document.createElement("button");
     button.type = "button";
-    button.className = "atlas-card";
+    button.className = "almanac-card";
     button.dataset.cardId = String(card.id);
     button.classList.toggle("is-selected", card.id === selectedIds[category]);
     button.setAttribute("aria-pressed", String(card.id === selectedIds[category]));
@@ -169,6 +169,10 @@ function renderDetail() {
   document.getElementById("detail-recharge").textContent = isPlant
     ? getPlantRecharge(card)
     : catalog.zombieRecharges?.[card.id] ?? "未收录";
+  const suddenDeathRecharge = catalog.suddenDeathRecharges[card.id];
+  document.getElementById("detail-sudden-death-recharge").textContent = suddenDeathRecharge === null
+    ? "停用"
+    : suddenDeathRecharge === undefined ? "未收录" : `${formatNumber(suddenDeathRecharge)} 秒`;
 
   const stats = document.getElementById("stat-list");
   stats.replaceChildren();
@@ -186,6 +190,10 @@ function renderDetail() {
   } else {
     addStat(stats, "生命值", health ?? "未收录");
     if (zombieStats?.health?.armor) addStat(stats, "防具强度", zombieStats.health.armor);
+    const zombieDps = getZombieDps(card);
+    if (zombieDps !== null) addStat(stats, "每秒伤害", zombieDps);
+    if (zombieStats?.healingPerSecond !== undefined) addStat(stats, "每秒治疗", formatNumber(zombieStats.healingPerSecond));
+    if (zombieStats?.attackInterval) addStat(stats, "攻击间隔", zombieStats.attackInterval);
     if (zombieSpeed) addStat(stats, "速度", [zombieSpeed.value, zombieSpeed.unit].filter(Boolean).join(" "));
     if (zombieSpeed?.note) addStat(stats, "速度变化", zombieSpeed.note);
     if (zombieMound) {
@@ -200,6 +208,17 @@ function renderDetail() {
   document.getElementById("detail-attack").textContent = "";
   document.getElementById("detail-ability").textContent = getCardDescription(card);
   renderVariants(card);
+}
+
+function getZombieDps(card) {
+  const damagePerSecond = catalog.zombieStats[card.id]?.damagePerSecond;
+  if (damagePerSecond !== undefined) return formatNumber(damagePerSecond);
+  const profile = catalog.zombieEatProfiles[card.id];
+  if (profile === null) return null;
+  if (!profile) return `${catalog.zombieEatDpsBase}（啃食）`;
+  return profile.map(({ multiplier, state }) =>
+    `${formatNumber(catalog.zombieEatDpsBase * multiplier)}（${state}）`
+  ).join(" / ");
 }
 
 function getZombieCost(card) {

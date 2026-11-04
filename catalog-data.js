@@ -66,6 +66,20 @@ window.PVZ_CATALOG = {
       200: "30 秒", 201: "7.5 秒", 202: "7.5 秒", 203: "30 秒", 204: "15 秒", 205: "30 秒", 206: "60 秒",
       207: "30 秒", 208: "30 秒", 209: "30 秒", 210: "7.5 秒"
   },
+  suddenDeathRecharges: {
+    0: 2.5, 1: null, 2: 30, 3: 30, 4: 15, 5: 2.5, 6: 2.5, 7: 5,
+    8: 5, 9: null, 10: 2.5, 11: 10, 12: 10, 13: 2.5, 14: 30, 15: 30,
+    16: 2.5, 17: 15, 18: 5, 19: 10, 20: 30, 21: 10, 22: 2.5, 23: 30,
+    24: 10, 26: 5, 27: 2.5, 28: 2.5, 29: 5, 30: 30, 31: 2.5, 32: 5,
+    34: 5, 35: 2.5, 36: 2.5, 37: 10, 39: 5, 200: 15, 201: 2.5, 202: 2.5,
+    203: 10, 204: 5, 205: 30, 206: 30, 207: null, 208: 30, 209: 30, 210: 2.5,
+    61: null, 62: 5, 63: 30, 64: 10, 65: 10, 66: 10, 67: 10, 68: 5,
+    69: 15, 70: 10, 71: 10, 72: 20, 73: 5, 74: 10, 75: 20, 76: 10,
+    77: 10, 78: 20, 79: 20, 80: 10, 81: 10, 82: 5, 83: 10, 84: 10,
+    85: 10, 86: 2.5, 87: 10, 88: 10, 89: 10, 90: 10, 91: 5, 92: 10,
+    93: 5, 94: 10, 95: 10, 96: 5, 97: 10, 98: 10, 99: 20, 100: 10,
+    101: 10, 102: 10, 103: 10, 104: 10, 105: 10
+  },
   dpsProfiles: {
     0: { damage: 20, interval: 1.5 },
     5: { damage: 20, interval: 1.5 },
@@ -201,9 +215,25 @@ window.PVZ_CATALOG = {
     100: { health: { value: 500 } },
     101: { health: { value: 500 } },
     102: { health: { value: 270, armor: 100 } },
-    103: { health: { value: 500 } },
+    103: { health: { value: 500 }, damagePerSecond: 75, healingPerSecond: 10, attackInterval: "2 秒" },
     104: { health: { value: 270, armor: 150 } },
     105: { health: { value: 300 } }
+  },
+  // Normal chewing DPS is 100; multipliers follow Zombie::GetEatDamage().
+  // null marks units excluded from chewing by CheckIfPreyCaught(), plus graves.
+  zombieEatDpsBase: 100,
+  zombieEatProfiles: {
+    61: null,
+    72: null,
+    76: null,
+    78: null,
+    79: null,
+    91: null,
+    96: [{ multiplier: 2, state: "普通" }, { multiplier: 4, state: "暴怒" }],
+    99: null,
+    100: [{ multiplier: 1, state: "本体" }, { multiplier: 2, state: "僵尸狗" }],
+    103: null,
+    104: [{ multiplier: 2, state: "持铲" }, { multiplier: 1, state: "失铲" }]
   },
   zombieSpeeds: {
     62: { value: "4.6–7.4", unit: "秒/格" },
