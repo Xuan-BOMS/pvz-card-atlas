@@ -5,6 +5,18 @@ const closeDetail = document.getElementById("close-detail");
 const selectedIds = { plants: 0, zombies: 62 };
 const variantIndex = { 91: 0 };
 const oneTimePlantIds = new Set([2, 4, 12, 14, 15, 17, 19, 20, 27, 35, 200, 206, 207]);
+const specialMechanisms = {
+  plants: {
+    11: "吞噬二级及以上的召唤墓碑需要消耗 2 个墓碑吞。",
+    18: "位于第一路或第五路时，会额外发射一颗豌豆。",
+    200: "场上有多只僵尸时，会优先冻结火把僵尸。"
+  },
+  zombies: {
+    89: "本体生命值降至 135 以下时，会碾压植物。",
+    93: "倒计时结束后（约走至第三列），接触植物时会自爆，造成 301 点伤害。",
+    94: "入场时记录场上所有僵尸；倒计时结束后，复活其中已死亡的僵尸。本体生命值恢复至原值的 2/3，防具生命值恢复至原值的 1/2，最多复活 15 只。"
+  }
+};
 let category = "plants";
 let returnFocus = null;
 
@@ -31,6 +43,10 @@ function getCardDescription(card) {
   return window.PVZ_GAME_STRINGS?.[card.en]?.description || "";
 }
 
+function getSpecialMechanism(card) {
+  return specialMechanisms[category][card.id] || "";
+}
+
 function addText(parent, tag, className, content) {
   const element = document.createElement(tag);
   if (className) element.className = className;
@@ -43,19 +59,26 @@ function formatNumber(value) {
   return Number.isInteger(value) ? String(value) : value.toFixed(1).replace(/\.0$/, "");
 }
 
+function getCardState(card) {
+  return catalog.cardStates[card.id]?.[variantIndex[card.id] || 0];
+}
+
 function getDps(card) {
-  const profile = catalog.dpsProfiles[card.id];
+  const profile = getCardState(card)?.dps || catalog.dpsProfiles[card.id];
   if (!profile) return null;
-  const hits = Array.isArray(profile.damage) ? profile.damage : [profile.damage, profile.damage];
+  const hits = Array.isArray(profile.damage) ? profile.damage : [profile.damage];
+  const intervals = Array.isArray(profile.interval) ? profile.interval : [profile.interval];
   const hitsPerTarget = profile.hitsPerTarget ?? 1;
-  const dps = hits.map((damage) => damage * hitsPerTarget / profile.interval);
-  const peaDps = catalog.dpsProfiles[0].damage / catalog.dpsProfiles[0].interval;
-  const formatRange = (values, formatter) => values[0] === values[1]
-    ? formatter(values[0])
-    : `${formatter(values[0])}–${formatter(values[1])}`;
+  const expectedDamage = profile.probabilities
+    ? hits.reduce((sum, damage, index) => sum + damage * profile.probabilities[index], 0)
+    : hits.reduce((sum, damage) => sum + damage, 0) / hits.length;
+  const averageInterval = intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length;
+  const dps = expectedDamage * hitsPerTarget / averageInterval;
+  const peaInterval = catalog.dpsProfiles[0].interval;
+  const peaDps = catalog.dpsProfiles[0].damage / (Array.isArray(peaInterval) ? (peaInterval[0] + peaInterval[1]) / 2 : peaInterval);
   return {
-    value: formatRange(dps, formatNumber),
-    ratio: formatRange(dps.map((value) => value / peaDps), formatNumber)
+    value: formatNumber(dps),
+    ratio: Number((dps / peaDps).toFixed(2)).toString()
   };
 }
 
@@ -113,24 +136,29 @@ function addStat(rows, label, value) {
 function renderVariants(card) {
   const list = document.getElementById("variant-list");
   list.replaceChildren();
-  if (!card.variants) {
+  const states = catalog.cardStates[card.id];
+  const variants = states || card.variants;
+  if (!variants) {
     list.hidden = true;
     return;
   }
   list.hidden = false;
-  addText(list, "span", "variant-label", "墓堆等级");
-  card.variants.forEach((level) => {
+  const label = states ? category === "plants" ? "植物状态" : "僵尸状态" : "墓堆等级";
+  addText(list, "span", "variant-label", label);
+  variants.forEach((variant, index) => {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "variant-button";
-    button.classList.toggle("is-active", variantIndex[card.id] === level);
-    button.setAttribute("aria-pressed", String(variantIndex[card.id] === level));
-    button.textContent = String(level + 1);
-    button.setAttribute("aria-label", `墓堆等级 ${level + 1}`);
+    const active = (variantIndex[card.id] || 0) === index;
+    button.classList.toggle("is-active", active);
+    button.setAttribute("aria-pressed", String(active));
+    button.textContent = states ? variant.label : String(variant + 1);
+    button.setAttribute("aria-label", `${label} ${button.textContent}`);
     button.addEventListener("click", () => {
-      variantIndex[card.id] = level;
+      variantIndex[card.id] = index;
       renderGrid();
       renderDetail();
+      list.querySelectorAll("button")[index].focus();
     });
     list.append(button);
   });
@@ -154,8 +182,9 @@ function renderDetail() {
     "detail-art"
   );
 
+  const cardState = getCardState(card);
   const zombieStats = !isPlant ? catalog.zombieStats[card.id] : null;
-  const zombieSpeed = !isPlant ? catalog.zombieSpeeds[card.id] : null;
+  const zombieSpeed = !isPlant ? cardState?.speed || catalog.zombieSpeeds[card.id] : null;
   const zombieMound = !isPlant && card.id === 91 ? catalog.zombieMoundProfiles[variantIndex[card.id] || 0] : null;
   const zombieCost = !isPlant ? getZombieCost(card) : null;
   const health = zombieStats ? getZombieHealth(card, zombieStats) : null;
@@ -169,6 +198,10 @@ function renderDetail() {
   document.getElementById("detail-recharge").textContent = isPlant
     ? getPlantRecharge(card)
     : catalog.zombieRecharges?.[card.id] ?? "未收录";
+  const openingRecharge = getOpeningRecharge(card);
+  document.getElementById("detail-opening-recharge").textContent = openingRecharge === null
+    ? "未收录"
+    : `${formatNumber(openingRecharge)} 秒`;
   const suddenDeathRecharge = catalog.suddenDeathRecharges[card.id];
   document.getElementById("detail-sudden-death-recharge").textContent = suddenDeathRecharge === null
     ? "停用"
@@ -177,8 +210,9 @@ function renderDetail() {
   const stats = document.getElementById("stat-list");
   stats.replaceChildren();
   if (isPlant) {
-    if (card.damage && card.damage !== "无直接伤害" && card.damage !== "不攻击僵尸") {
-      addStat(stats, /\d/.test(card.damage) || card.singleDamage !== undefined || dps ? "伤害" : "效果", card.damage);
+    const damage = cardState?.damage ?? card.damage;
+    if (damage && damage !== "无直接伤害" && damage !== "不攻击僵尸") {
+      addStat(stats, /\d/.test(damage) || card.singleDamage !== undefined || dps ? "伤害" : "效果", damage);
     }
     if (dps) addStat(stats, "每秒伤害", `${dps.value}（${dps.ratio} 豆）`);
     if (oneTimePlantIds.has(card.id)) {
@@ -186,7 +220,7 @@ function renderDetail() {
     } else if (card.attackInterval !== "—" && !/一次性|触发后一次|触发后生效|被吃后触发|布置后启动|产阳|产币|自动拾取|按目标触发|受攻击触发|复制目标/.test(card.attackInterval)) {
       addStat(stats, "攻击间隔", card.attackInterval);
     }
-    addStat(stats, "生命值", card.health);
+    addStat(stats, "生命值", cardState?.health ?? card.health);
   } else {
     addStat(stats, "生命值", health ?? "未收录");
     if (zombieStats?.health?.armor) addStat(stats, "防具强度", zombieStats.health.armor);
@@ -194,7 +228,13 @@ function renderDetail() {
     if (zombieDps !== null) addStat(stats, "每秒伤害", zombieDps);
     if (zombieStats?.healingPerSecond !== undefined) addStat(stats, "每秒治疗", formatNumber(zombieStats.healingPerSecond));
     if (zombieStats?.attackInterval) addStat(stats, "攻击间隔", zombieStats.attackInterval);
-    if (zombieSpeed) addStat(stats, "速度", [zombieSpeed.value, zombieSpeed.unit].filter(Boolean).join(" "));
+    if (zombieSpeed?.phases) {
+      for (const phase of zombieSpeed.phases) {
+        addStat(stats, phase.label, phase.unit ? `${phase.value} ${phase.unit}` : phase.value);
+      }
+    } else if (zombieSpeed) {
+      addStat(stats, "速度", [zombieSpeed.value, zombieSpeed.unit].filter(Boolean).join(" "));
+    }
     if (zombieSpeed?.note) addStat(stats, "速度变化", zombieSpeed.note);
     if (zombieMound) {
       addStat(stats, "墓堆等级", String((variantIndex[card.id] || 0) + 1));
@@ -207,6 +247,9 @@ function renderDetail() {
   document.getElementById("detail-attack").hidden = true;
   document.getElementById("detail-attack").textContent = "";
   document.getElementById("detail-ability").textContent = getCardDescription(card);
+  const mechanism = getSpecialMechanism(card);
+  document.getElementById("detail-mechanism").textContent = mechanism;
+  document.getElementById("mechanism-section").hidden = !mechanism;
   renderVariants(card);
 }
 
@@ -237,10 +280,19 @@ function getPlantRecharge(card) {
   return catalog.plantRecharges[card.id] ?? card.recharge;
 }
 
+function getOpeningRecharge(card) {
+  const group = category === "plants" ? "plants" : "zombies";
+  const overrides = catalog.openingRechargeOverrides[group];
+  if (Object.hasOwn(overrides, card.id)) return overrides[card.id];
+  const rechargeText = category === "plants" ? getPlantRecharge(card) : catalog.zombieRecharges?.[card.id];
+  const recharge = Number.parseFloat(rechargeText);
+  return catalog.openingRechargeDefaults[String(recharge)] ?? null;
+}
+
 function getZombieHealth(card, stats) {
   const health = stats.health;
   if (card.id === 91) return health.levels[variantIndex[card.id] || 0];
-  return health.value;
+  return getCardState(card)?.health ?? health.value;
 }
 
 function renderCategory() {

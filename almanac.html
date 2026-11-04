@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#a8632f">
+    <meta name="description" content="PvZ TV 植物与僵尸卡牌图鉴，查看卡牌基础属性。">
+    <title>植物图鉴 · PvZ TV</title>
+    <link rel="stylesheet" href="./styles.css?v=pvz-release-20261104-6">
+    <script src="./catalog-data.js?v=pvz-release-20261104-6" defer></script>
+    <script src="./game-strings.js?v=pvz-release-20261104-6" defer></script>
+    <script src="./app.js?v=pvz-release-20261104-6" defer></script>
+  </head>
+  <body data-category="plants">
+    <div class="page-shell">
+      <header class="site-header">
+        <div class="header-emblem" aria-hidden="true"><span></span></div>
+        <div class="title-plank">
+          <h1>图鉴</h1>
+        </div>
+        <div class="header-stamp"><span>版本</span><b>V3215</b></div>
+      </header>
+
+      <nav class="catalog-nav" aria-label="图鉴分类">
+        <button class="category-button is-active" type="button" data-category="plants" aria-pressed="true">植物</button>
+        <button class="category-button" type="button" data-category="zombies" aria-pressed="false">僵尸</button>
+      </nav>
+
+      <main class="almanac-layout">
+        <section class="catalog-area" aria-labelledby="catalog-title">
+          <div class="section-heading">
+            <div>
+              <p class="section-kicker">PVZ ALMANAC</p>
+              <h2 id="catalog-title">图鉴 — 植物</h2>
+            </div>
+            <span id="card-count" class="count-ribbon">60 张</span>
+          </div>
+          <div id="catalog-grid" class="card-grid" aria-label="卡牌目录"></div>
+        </section>
+
+        <aside id="detail-panel" class="detail-panel" aria-labelledby="detail-name" tabindex="-1">
+          <button id="close-detail" class="close-detail" type="button" aria-label="返回图鉴">返回图鉴</button>
+          <div class="detail-heading">
+            <div>
+              <p id="detail-kicker" class="detail-kicker">植物卡 · 00</p>
+              <h2 id="detail-name">豌豆射手</h2>
+              <p id="detail-en" class="detail-en">PEASHOOTER</p>
+            </div>
+            <span id="detail-id" class="seed-id">#00</span>
+          </div>
+          <div class="detail-hero">
+            <div id="detail-art-frame" class="detail-art-frame"><span class="card-face"><img id="detail-art" src="./assets/cards/SEED_PACKET_00.PNG" alt="豌豆射手卡图"><span class="card-cost">100</span></span></div>
+            <div class="detail-headline-stats">
+              <p><span id="detail-cost-label">阳光花费</span><b id="detail-cost-value">75</b></p>
+              <p><span>恢复时间</span><b id="detail-recharge">7.5 秒</b></p>
+              <p><span>死斗恢复</span><b id="detail-sudden-death-recharge">2.5 秒</b></p>
+              <p><span>开局 CD</span><b id="detail-opening-recharge">10 秒</b></p>
+            </div>
+          </div>
+          <div id="variant-list" class="variant-list" hidden></div>
+          <section class="stat-section" aria-labelledby="stats-title">
+            <h3 id="stats-title">基础数据</h3>
+            <dl id="stat-list" class="stat-list"></dl>
+          </section>
+          <section class="ability-section" aria-labelledby="ability-title">
+            <h3 id="ability-title">描述</h3>
+            <p id="detail-attack" class="attack-line"></p>
+            <p id="detail-ability" class="ability-copy"></p>
+          </section>
+          <section id="mechanism-section" class="mechanism-section" aria-labelledby="mechanism-title" hidden>
+            <h3 id="mechanism-title">特殊机制</h3>
+            <p id="detail-mechanism" class="ability-copy"></p>
+          </section>
+        </aside>
+      </main>
+
+      <footer class="site-footer">
+        <span>植物大战僵尸 TV 触控版</span>
+        <span>植物 · 僵尸</span>
+      </footer>
+    </div>
+  </body>
+</html>

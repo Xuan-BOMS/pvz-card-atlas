@@ -382,13 +382,13 @@ h1 {
 }
 .detail-headline-stats b { color: var(--leaf-dark); font-size: 14px; font-weight: 800; text-align: right; }
 
-.stat-section, .ability-section {
+.stat-section, .ability-section, .mechanism-section {
   padding: 10px 11px;
   border: 2px solid #9a7047;
   border-radius: 5px;
   background: rgba(255, 238, 198, .78);
 }
-.stat-section h3, .ability-section h3 { margin: 0 0 7px; color: #744321; font: 700 15px/1.2 Georgia, "Microsoft YaHei", serif; }
+.stat-section h3, .ability-section h3, .mechanism-section h3 { margin: 0 0 7px; color: #744321; font: 700 15px/1.2 Georgia, "Microsoft YaHei", serif; }
 .stat-list { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0 13px; }
 body[data-category="zombies"] .stat-section { padding-left: 6px; padding-right: 6px; }
 body[data-category="zombies"] .stat-list { column-gap: 8px; }
@@ -451,7 +451,7 @@ body[data-category="zombies"] .almanac-card.is-selected { border-color: #d58c20;
 body[data-category="zombies"] .detail-headline-stats b,
 body[data-category="zombies"] .stat-row dd,
 body[data-category="zombies"] .attack-line { color: #317f36; }
-body[data-category="zombies"] .stat-section, body[data-category="zombies"] .ability-section { border-color: #8884a5; background: rgba(239,233,246,.88); }
+body[data-category="zombies"] .stat-section, body[data-category="zombies"] .ability-section, body[data-category="zombies"] .mechanism-section { border-color: #8884a5; background: rgba(239,233,246,.88); }
 
 @media (max-width: 900px) {
   .page-shell { padding: 12px 13px 10px; gap: 10px; }
@@ -526,8 +526,8 @@ body[data-category="zombies"] .stat-section, body[data-category="zombies"] .abil
   .detail-hero { grid-template-columns: 96px minmax(0, 1fr); gap: 10px; }
   .detail-headline-stats { gap: 3px; }
   .detail-headline-stats p { padding: 4px 5px; font-size: 12px; }
-  .stat-section, .ability-section { padding: 8px 9px; }
-  .stat-section h3, .ability-section h3 { font-size: 14px; }
+  .stat-section, .ability-section, .mechanism-section { padding: 8px 9px; }
+  .stat-section h3, .ability-section h3, .mechanism-section h3 { font-size: 14px; }
   .stat-list { grid-template-columns: 1fr; }
   .stat-row { min-height: 32px; font-size: 12px; }
   .ability-copy { font-size: 13px; }
@@ -573,8 +573,8 @@ body[data-category="zombies"] .stat-section, body[data-category="zombies"] .abil
   .detail-hero { grid-template-columns: 70px minmax(0, 1fr); gap: 6px; padding: 4px; }
   .detail-headline-stats p { padding: 3px 4px; font-size: 12px; }
   .detail-headline-stats b { font-size: 12px; }
-  .stat-section, .ability-section { padding: 5px 6px; }
-  .stat-section h3, .ability-section h3 { margin-bottom: 4px; font-size: 12px; }
+  .stat-section, .ability-section, .mechanism-section { padding: 5px 6px; }
+  .stat-section h3, .ability-section h3, .mechanism-section h3 { margin-bottom: 4px; font-size: 12px; }
   .stat-list { grid-template-columns: 1fr; }
   .stat-row { min-height: 28px; font-size: 12px; }
   .attack-line, .ability-copy { font-size: 12px; }
