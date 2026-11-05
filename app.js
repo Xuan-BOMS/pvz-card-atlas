@@ -383,13 +383,9 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-const homeUrl = location.protocol === "file:"
-  ? "http://154.219.106.185:48080/"
-  : location.pathname.startsWith("/almanac/") ? "/" : "./";
-for (const link of document.querySelectorAll("[data-home-link]")) link.href = homeUrl;
-document.querySelector("[data-download-link]").href = `${homeUrl}#downloads`;
-document.querySelector("[data-data-link]").href = location.protocol === "file:" || location.hostname.endsWith("github.io")
-  ? "http://154.219.106.185:48080/data/" : "/data/";
 renderCategory();
-const preloadBackground = new Image();
-preloadBackground.src = window.PVZ_IMAGE_DATA?.["zombie-background.webp"] || "./site/ui/zombie-background.webp";
+const zombieBackground = window.PVZ_IMAGE_DATA?.["zombie-background.webp"];
+if (zombieBackground) {
+  const preloadBackground = new Image();
+  preloadBackground.src = zombieBackground;
+}

@@ -1,11 +1,13 @@
-# PvZ TV Card Atlas
+# PvZ TV 3215 图鉴
 
-Static Chinese card encyclopedia for PvZ TV 3215. It includes the supplied full-card images, a plant statistics catalog, and a zombie directory. It does not display win rates or match statistics.
+[在线图鉴](https://xuan-boms.github.io/pvz-card-atlas/)
 
-Open `index.html` directly, or serve this folder with `python -m http.server 8000` for local testing. Pushes to `main` publish through GitHub Pages.
+这是面向 PvZ TV 3215 的静态植物与僵尸卡牌图鉴，收录 48 种植物和 45 种僵尸，可查看卡牌费用、冷却和属性。页面仅提供图鉴内容，不包含对战统计、游戏下载或联机服务。
 
-For single-file deployment, upload `pvz-card-atlas.html`; it embeds the styles, scripts, catalog data, and all card images.
+打开仓库根目录会直接进入图鉴：`index.html` 跳转到 `almanac.html`。GitHub Pages 从 `main` 分支根目录发布。
 
-Plant card IDs, sun costs, cooldowns, attack intervals, and projectile damage are based on the [PlantsVsZombies-AndroidTV source](https://github.com/ZombieYetis/PlantsVsZombies-AndroidTV). Card names are cross-checked against the [PvZ-TV-Server seed-name map](https://github.com/ZombieYetis/PvZ-TV-Server). Images are copied from the user-provided `v3215全卡图` folder.
+- `almanac.html` 使用独立的样式、卡牌数据、游戏文本和卡图资源。
 
-Plant DPS is shown as actual damage per second plus a Peashooter-relative value (`1 pea = Peashooter DPS`). It is calculated from damage per attack cycle and the cycle interval; probabilistic or form-dependent attacks show an expected value or range.
+本地预览可在仓库根目录运行 `python -m http.server 8000`，然后打开 `http://localhost:8000/`。
+
+数值参考 PvZ TV 3215 游戏数据；名称和描述沿用游戏文本。卡图来自用户提供的 `v3215全卡图` 素材。

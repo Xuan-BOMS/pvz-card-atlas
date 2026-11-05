@@ -28,7 +28,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background-color: #c38a4b;
-  background-image: url("./site/ui/plant-background.webp");
+  background-image: url("./assets/site/ui/plant-background.webp");
   background-position: center top;
   background-size: cover;
   background-attachment: fixed;
@@ -594,7 +594,7 @@ body[data-category="zombies"] .stat-section, body[data-category="zombies"] .abil
   *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
 
-body[data-category="zombies"] { background-image: url("./site/ui/zombie-background.webp"); }
+body[data-category="zombies"] { background-image: url("./assets/site/ui/zombie-background.webp"); }
 .site-header { grid-template-columns: 1fr; position: relative; }
 .header-emblem, .header-stamp { display: none; }
 .title-plank { justify-self: center; width: min(560px, 100%); min-height: 58px; display: grid; place-items: center; border: 0; background: transparent; box-shadow: none; }
